@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CoursesService } from './courses.service';
 import { randomUUID } from 'crypto';
+import { createCourseDTO } from './dto/create-course-dto';
 
 describe('CoursesService unit tests', () => {
   let service: CoursesService;
@@ -18,7 +19,7 @@ describe('CoursesService unit tests', () => {
     expectOutputTags = [
       {
         id,
-        name: 'nest.js',
+        name: 'nestjs',
         created_at,
       },
     ];
@@ -36,7 +37,7 @@ describe('CoursesService unit tests', () => {
       update: jest.fn().mockReturnValue(Promise.resolve(expectOutputCourses)),
       preload: jest.fn().mockReturnValue(Promise.resolve(expectOutputCourses)),
       findAll: jest.fn().mockReturnValue(Promise.resolve(expectOutputCourses)),
-      find: jest.fn().mockReturnValue(Promise.resolve(expectOutputCourses)),
+      find: jest.fn().mockReturnValue(Promise.resolve(expectOutputCourses)), 
       findOne: jest.fn().mockReturnValue(Promise.resolve(expectOutputCourses)),
       remove: jest.fn().mockReturnValue(Promise.resolve(expectOutputCourses)),
     }
@@ -49,5 +50,23 @@ describe('CoursesService unit tests', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  it('should create a course', async () => {
+    //@ts-expect-error defined part of methods
+    service['courseRepository'] = mockCourseRepository
+    //@ts-expect-error defined part of methods
+    service['tagRepository'] = mockTagRepository
+
+    const createCourseDTO: createCourseDTO = {
+      name: 'test',
+      description: 'test description',
+      tags: ['nestjs']
+    }
+
+    const newCourse = await service.create(createCourseDTO)
+    //Espera-se que o método .save seja chamado ao criar o course
+    expect(mockCourseRepository.save).toHaveBeenCalled();
+    expect(expectOutputCourses).toStrictEqual(newCourse)
   });
 });
